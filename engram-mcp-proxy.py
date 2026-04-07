@@ -122,7 +122,7 @@ def mem_search(args):
     for r in results:
         title = r.get("title", "untitled")
         typ = r.get("type", "?")
-        content = r.get("content", "")[:200]
+        content = r.get("content", "")
         lines.append(f"- [{typ}] **{title}**: {content}")
     return "\n".join(lines)
 
