@@ -16,7 +16,7 @@ services:
     command:
       - -c
       - |
-        wget -qO- https://github.com/Gentleman-Programming/engram/releases/download/v1.10.4/engram_1.10.4_linux_amd64.tar.gz | tar xz -C /usr/local/bin/ engram && \
+        wget -qO- https://github.com/Gentleman-Programming/engram/releases/download/v1.10.4/engram_1.10.4_linux_arm64.tar.gz | tar xz -C /usr/local/bin/ engram && \
         engram serve 7437
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:7437/health"]
