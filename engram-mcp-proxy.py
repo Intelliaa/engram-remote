@@ -74,9 +74,27 @@ def http_delete(path):
 
 # --- Tool implementations (MCP tool name -> HTTP call) ---
 
+_ensured_sessions = set()
+
+
+def ensure_session(session_id, project=""):
+    """Create session if it doesn't exist yet (idempotent per process)."""
+    if session_id in _ensured_sessions:
+        return
+    try:
+        http_post("/sessions", {"id": session_id, "project": project, "directory": ""})
+    except urllib.error.HTTPError as e:
+        # 409 Conflict = session already exists, that's fine
+        if e.code != 409:
+            pass  # best-effort, don't block the save
+    _ensured_sessions.add(session_id)
+
+
 def mem_save(args):
+    session_id = args.get("session_id", f"remote-{datetime.now(timezone.utc).strftime('%Y%m%d')}")
+    ensure_session(session_id, args.get("project", ""))
     body = {
-        "session_id": args.get("session_id", f"remote-{datetime.now(timezone.utc).strftime('%Y%m%d')}"),
+        "session_id": session_id,
         "type": args.get("type", "manual"),
         "title": args["title"],
         "content": args["content"],
@@ -172,8 +190,10 @@ def mem_session_end(args):
 
 
 def mem_session_summary(args):
+    session_id = args.get("session_id", f"remote-{datetime.now(timezone.utc).strftime('%Y%m%d')}")
+    ensure_session(session_id, args.get("project", ""))
     body = {
-        "session_id": args.get("session_id", f"remote-{datetime.now(timezone.utc).strftime('%Y%m%d')}"),
+        "session_id": session_id,
         "type": "session_summary",
         "title": args.get("title", "Session Summary"),
         "content": args.get("content", ""),
